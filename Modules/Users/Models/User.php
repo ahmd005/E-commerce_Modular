@@ -26,4 +26,10 @@ class User extends Authenticatable
     protected $casts = [
         'password' => 'hashed',
     ];
+
+    // علاقة المستخدم مع عناصر السلة
+    public function cartItems()
+    {
+        return $this->hasMany(\Modules\Orders\Models\CartItem::class);
+    }
 }
