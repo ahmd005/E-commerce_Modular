@@ -1,0 +1,7 @@
+{
+    "Users": true,
+    "Products": true,
+    "Orders": true,
+    "Notifications": true,
+    "Categories": true
+}
