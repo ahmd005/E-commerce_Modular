@@ -12,9 +12,11 @@ class ProductRepository implements ProductRepositoryInterface
         $query = Product::with('category');
 
         // ميزة إضافية: التصفية حسب التصنيف (Category Filter)
-        if ($request->has('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
+        if ($request->has('category_uuid')) {
+        $query->whereHas('category', function ($q) use ($request) {
+            $q->where('uuid', $request->category_uuid);
+        });
+    }
 
         // التصفية بالبحث عن الاسم
         if ($request->has('search')) {
@@ -25,9 +27,10 @@ class ProductRepository implements ProductRepositoryInterface
         return $query->paginate($request->get('per_page', 10));
     }
 
-    public function findById($id)
+
+    public function findById($uuid)
     {
-        return Product::with('category')->findOrFail($id);
+        return Product::with('category')->where('uuid', $uuid)->firstOrFail();
     }
 
     public function create(array $data)
@@ -35,16 +38,18 @@ class ProductRepository implements ProductRepositoryInterface
         return Product::create($data);
     }
 
-    public function update($id, array $data)
+   
+    public function update($uuid, array $data)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::where('uuid', $uuid)->firstOrFail();
         $product->update($data);
         return $product;
     }
 
-    public function delete($id)
+
+    public function delete($uuid)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::where('uuid', $uuid)->firstOrFail();
         return $product->delete();
     }
 }

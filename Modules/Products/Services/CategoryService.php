@@ -19,9 +19,9 @@ class CategoryService
         return $this->categoryRepository->all();
     }
 
-    public function getCategoryById($id)
+    public function getCategoryById($uuid)
     {
-        return $this->categoryRepository->findById($id);
+        return $this->categoryRepository->findById($uuid);
     }
 
     public function createCategory(array $data)
@@ -30,16 +30,16 @@ class CategoryService
         return $this->categoryRepository->create($data);
     }
 
-    public function updateCategory($id, array $data)
+    public function updateCategory($uuid, array $data)
     {
         if (isset($data['name'])) {
             $data['slug'] = Str::slug($data['name']);
         }
-        return $this->categoryRepository->update($id, $data);
+        return $this->categoryRepository->update($uuid, $data);
     }
 
-    public function deleteCategory($id)
+    public function deleteCategory($uuid)
     {
-        return $this->categoryRepository->delete($id);
+        return $this->categoryRepository->delete($uuid);
     }
 }

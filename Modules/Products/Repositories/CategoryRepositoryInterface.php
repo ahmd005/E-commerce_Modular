@@ -5,8 +5,8 @@ namespace Modules\Products\Repositories;
 interface CategoryRepositoryInterface
 {
     public function all();
-    public function findById($id);
+    public function findById($uuid);
     public function create(array $data);
-    public function update($id, array $data);
-    public function delete($id);
+    public function update($uuid, array $data);
+    public function delete($uuid);
 }
