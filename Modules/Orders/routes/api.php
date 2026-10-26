@@ -1,8 +1,20 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Orders\App\Http\Controllers\OrdersController;
+use Modules\Orders\App\Http\Controllers\CartController;
+use Modules\Orders\App\Http\Controllers\OrderController;
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('orders', OrdersController::class)->names('orders');
-});
+    Route::prefix('cart')->controller(CartController::class)->group(function () {
+        Route::get('/v1', 'index');
+        Route::post('/v1', 'store');
+        Route::put('/v1/{uuid}', 'update')->whereUuid('uuid');
+        Route::delete('/v1/{uuid}', 'destroy')->whereUuid('uuid');
+        Route::delete('/v1/clear', 'clear');
+    });
+    Route::prefix('orders')->controller(OrderController::class)->group(function () {
+        Route::get('/v1', 'index');
+        Route::post('/v1', 'store');
+        Route::get('/v1/{uuid}', 'show')->whereUuid('uuid');
+        Route::put('/v1/{uuid}', 'update')->whereUuid('uuid');
+        Route::delete('/v1/{uuid}', 'destroy')->whereUuid('uuid');
+    });
