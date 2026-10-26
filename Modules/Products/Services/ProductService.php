@@ -5,6 +5,7 @@ namespace Modules\Products\Services;
 use Modules\Products\Repositories\ProductRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Modules\Products\Models\Category;
 
 class ProductService
 {
@@ -20,23 +21,40 @@ class ProductService
         return $this->productRepository->getAll($request);
     }
 
-    public function getProductById($id)
+    public function getProductById($uuid)
     {
-        return $this->productRepository->findById($id);
+        return $this->productRepository->findById($uuid);
     }
 
-    public function createProduct(array $data, $imageFile = null)
-    {
-        if ($imageFile) {
-            $data['image'] = $imageFile->store('products', 'public');
-        }
+    // public function createProduct(array $data, $imageFile = null)
+    // {
+    //     if ($imageFile) {
+    //         $data['image'] = $imageFile->store('products', 'public');
+    //     }
 
-        return $this->productRepository->create($data);
+    //     return $this->productRepository->create($data);
+    // }
+
+
+public function createProduct(array $data, $imageFile = null)
+{
+    // تحويل الـ category_uuid القادم من الطلب إلى category_id حقيقي لقاعدة البيانات
+    if (isset($data['category_uuid'])) {
+        $category = Category::where('uuid', $data['category_uuid'])->firstOrFail();
+        $data['category_id'] = $category->id;
+        unset($data['category_uuid']); // إزالة الـ uuid لكي لا يحدث خطأ في الحفظ
     }
 
-    public function updateProduct($id, array $data, $imageFile = null)
+    if ($imageFile) {
+        $data['image'] = $imageFile->store('products', 'public');
+    }
+
+    return $this->productRepository->create($data);
+}
+
+    public function updateProduct($uuid, array $data, $imageFile = null)
     {
-        $product = $this->productRepository->findById($id);
+        $product = $this->productRepository->findById($uuid);
 
         if ($imageFile) {
             // حذف الصورة القديمة إذا وجدت
@@ -46,17 +64,17 @@ class ProductService
             $data['image'] = $imageFile->store('products', 'public');
         }
 
-        return $this->productRepository->update($id, $data);
+        return $this->productRepository->update($uuid, $data);
     }
 
-    public function deleteProduct($id)
+    public function deleteProduct($uuid)
     {
-        $product = $this->productRepository->findById($id);
+        $product = $this->productRepository->findById($uuid);
 
         if ($product->image && Storage::disk('public')->exists($product->image)) {
             Storage::disk('public')->delete($product->image);
         }
 
-        return $this->productRepository->delete($id);
+        return $this->productRepository->delete($uuid);
     }
 }

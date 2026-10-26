@@ -33,21 +33,21 @@ class CategoryController extends Controller
         return $this->successResponse(new CategoryResource($category), 'تم إنشاء التصنيف بنجاح', 201);
     }
 
-    public function show($id)
+    public function show($uuid)
     {
-        $category = $this->categoryService->getCategoryById($id);
+        $category = $this->categoryService->getCategoryById($uuid);
         return $this->successResponse(new CategoryResource($category), 'تم جلب تفاصيل التصنيف بنجاح');
     }
 
-    public function update(UpdateCategoryRequest $request, $id)
+    public function update(UpdateCategoryRequest $request, $uuid)
     {
-        $category = $this->categoryService->updateCategory($id, $request->validated());
+        $category = $this->categoryService->updateCategory($uuid, $request->validated());
         return $this->successResponse(new CategoryResource($category), 'تم تحديث التصنيف بنجاح');
     }
 
-    public function destroy($id)
+    public function destroy($uuid)
     {
-        $this->categoryService->deleteCategory($id);
+        $this->categoryService->deleteCategory($uuid);
         return $this->successResponse(null, 'تم حذف التصنيف بنجاح');
     }
 }

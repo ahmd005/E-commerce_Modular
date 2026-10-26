@@ -11,9 +11,10 @@ class CategoryRepository implements CategoryRepositoryInterface
         return Category::all();
     }
 
-    public function findById($id)
+
+    public function findById($uuid)
     {
-        return Category::findOrFail($id);
+        return Category::where('uuid', $uuid)->firstOrFail();
     }
 
     public function create(array $data)
@@ -21,16 +22,18 @@ class CategoryRepository implements CategoryRepositoryInterface
         return Category::create($data);
     }
 
-    public function update($id, array $data)
+   
+    public function update($uuid, array $data)
     {
-        $category = Category::findOrFail($id);
+        $category = Category::where('uuid', $uuid)->firstOrFail();
         $category->update($data);
         return $category;
     }
 
-    public function delete($id)
+    
+    public function delete($uuid)
     {
-        $category = Category::findOrFail($id);
+        $category = Category::where('uuid', $uuid)->firstOrFail();
         return $category->delete();
     }
 }

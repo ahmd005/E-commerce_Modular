@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 interface ProductRepositoryInterface
 {
     public function getAll(Request $request);
-    public function findById($id);
+    public function findById($uuid);
     public function create(array $data);
-    public function update($id, array $data);
-    public function delete($id);
+    public function update($uuid, array $data);
+    public function delete($uuid);
 }

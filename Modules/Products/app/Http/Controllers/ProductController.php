@@ -45,17 +45,17 @@ class ProductController extends Controller
     }
 
     // عرض تفاصيل منتج معين
-    public function show($id)
+    public function show($uuid)
     {
-        $product = $this->productService->getProductById($id);
+        $product = $this->productService->getProductById($uuid);
         return $this->successResponse(new ProductResource($product), 'تم جلب تفاصيل المنتج بنجاح');
     }
 
     // تعديل منتج
-    public function update(UpdateProductRequest $request, $id)
+    public function update(UpdateProductRequest $request, $uuid)
     {
         $product = $this->productService->updateProduct(
-            $id,
+            $uuid,
             $request->validated(),
             $request->file('image')
         );
@@ -64,9 +64,9 @@ class ProductController extends Controller
     }
 
     // حذف منتج
-    public function destroy($id)
+    public function destroy($uuid)
     {
-        $this->productService->deleteProduct($id);
+        $this->productService->deleteProduct($uuid);
         return $this->successResponse(null, 'تم حذف المنتج بنجاح');
     }
 }
