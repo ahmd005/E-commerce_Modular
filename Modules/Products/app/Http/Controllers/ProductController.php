@@ -26,7 +26,11 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $products = $this->productService->getAllProducts($request);
-        return $this->successResponse(ProductResource::collection($products), 'تم جلب المنتجات بنجاح');
+       // return $this->successResponse(ProductResource::collection($products), 'تم جلب المنتجات بنجاح');
+       return ProductResource::collection($products)->additional([
+        'status' => true,
+        'message' => 'تم جلب المنتجات بنجاح',
+    ]);
     }
 
     // إضافة منتج جديد
