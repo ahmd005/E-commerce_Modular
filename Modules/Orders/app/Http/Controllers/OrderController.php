@@ -1,0 +1,132 @@
+<?php
+
+namespace Modules\Orders\App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Modules\Orders\App\Traits\ApiResponseTrait;
+use Modules\Orders\App\Traits\PaginationMetaTrait;
+use Modules\Orders\App\Http\Requests\StoreOrderRequest;
+use Modules\Orders\App\Http\Requests\UpdateOrderStatusRequest;
+use Modules\Orders\Services\OrderService;
+use Modules\Orders\App\Http\Resources\OrderResource;
+use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Exception;
+
+class OrderController extends Controller
+{
+    use ApiResponseTrait;
+    use PaginationMetaTrait;
+
+    protected OrderService $orderService;
+
+    public function __construct(OrderService $orderService)
+    {
+        $this->orderService = $orderService;
+    }
+
+    /**
+     * Display a listing of the user's orders (with pagination)
+     */
+    public function index(Request $request)
+    {
+        try {
+            $userId = $request->user()->id ?? 1;
+            $orders = $this->orderService->getUserOrders($userId);
+
+            return $this->successResponse([
+                'orders'     => OrderResource::collection($orders->items()),
+                'pagination' => $this->paginationMeta($orders),
+            ], 'Orders retrieved successfully');
+        } catch (Exception $e) {
+            return $this->errorResponse('Failed to retrieve orders: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Create a new order from the cart
+     */
+    /**
+     * Create a new order from the cart
+     */
+    public function store(Request $request)
+    {
+        try {
+            $userId = $request->user()->id ?? 1;
+            $order = $this->orderService->placeOrder($userId);
+
+            return $this->successResponse(
+                new OrderResource($order),
+                'Order placed successfully',
+                201
+            );
+        } catch (Exception $e) {
+            $statusCode = $e->getMessage() === 'Cart is empty' ? 422 : 500;
+            return $this->errorResponse('Failed to place order: ' . $e->getMessage(), $statusCode);
+        }
+    }
+
+    /**
+     * Display the specified order details
+     */
+    public function show(Request $request, $uuid)
+    {
+        try {
+            $userId = $request->user()->id ?? 1;
+            $order = $this->orderService->getOrder($uuid, $userId);
+
+            return $this->successResponse(
+                new OrderResource($order),
+                'Order details retrieved successfully'
+            );
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Order not found', 404);
+        } catch (Exception $e) {
+            return $this->errorResponse('Failed to retrieve order details: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Update the specified order status
+     */
+    public function update(UpdateOrderStatusRequest $request, $uuid)
+    {
+        try {
+            $userId = $request->user()->id ?? 1;
+            $order = $this->orderService->updateStatus(
+                $uuid,
+                $request->status(),
+                $userId
+            );
+
+            return $this->successResponse(
+                new OrderResource($order),
+                'Order status updated successfully'
+            );
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Order not found', 404);
+        } catch (Exception $e) {
+            return $this->errorResponse('Failed to update order status: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Remove the specified order
+     */
+    public function destroy(Request $request, $uuid)
+    {
+        try {
+            $userId = $request->user()->id ?? 1;
+            $this->orderService->deleteOrder($uuid, $userId);
+
+            return $this->successResponse(
+                null,
+                'Order deleted successfully'
+            );
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Order not found', 404);
+        } catch (Exception $e) {
+            return $this->errorResponse('Failed to delete order: ' . $e->getMessage(), 500);
+        }
+    }
+}

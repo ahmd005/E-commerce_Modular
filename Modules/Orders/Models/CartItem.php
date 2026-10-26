@@ -4,12 +4,15 @@ namespace Modules\Orders\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Users\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Orders\App\Traits\HasUuid;
 use Modules\Products\Models\Product;
+use Modules\Users\Models\User;
 
 class CartItem extends Model
 {
     use HasFactory;
+    use HasUuid;
 
     protected $table = 'cart_items';
 
@@ -20,12 +23,14 @@ class CartItem extends Model
         'quantity',
     ];
 
-    public function user()
+    // علاقة عنصر السلة مع المستخدم (BelongsTo)
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function product()
+    // علاقة عنصر السلة مع المنتج (BelongsTo)
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
