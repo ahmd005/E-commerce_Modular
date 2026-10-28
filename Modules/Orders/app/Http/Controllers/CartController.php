@@ -2,6 +2,7 @@
 
 namespace Modules\Orders\App\Http\Controllers;
 
+use App\Events\ItemAddedToCart;
 use App\Http\Controllers\Controller;
 use Modules\Orders\App\Traits\ApiResponseTrait;
 use Modules\Orders\App\Http\Requests\AddToCartRequest;
@@ -55,7 +56,7 @@ class CartController extends Controller
                 $userId,
                 $request->validated()
             );
-
+            event(new ItemAddedToCart($cartItem));
             return $this->successResponse(
                 new CartItemResource($cartItem), 
                 'The product has been successfully added to the cart', 

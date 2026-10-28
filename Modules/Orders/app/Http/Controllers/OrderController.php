@@ -2,6 +2,8 @@
 
 namespace Modules\Orders\App\Http\Controllers;
 
+use App\Events\OrderCreated;
+use App\Events\OrderStatusChanged;
 use App\Http\Controllers\Controller;
 use Modules\Orders\App\Traits\ApiResponseTrait;
 use Modules\Orders\App\Traits\PaginationMetaTrait;
@@ -55,6 +57,7 @@ class OrderController extends Controller
             $userId = $this->getAuthenticatedUserId();
             $order = $this->orderService->placeOrder($userId);
 
+            event(new OrderCreated($order));
             return $this->successResponse(
                 new OrderResource($order),
                 'Order placed successfully',
@@ -98,7 +101,7 @@ class OrderController extends Controller
                 $request->status(),
                 $userId
             );
-
+            event(new OrderStatusChanged($order, $order->status->value));
             return $this->successResponse(
                 new OrderResource($order),
                 'Order status updated successfully'
