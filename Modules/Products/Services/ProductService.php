@@ -6,6 +6,7 @@ use Modules\Products\Repositories\ProductRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Modules\Products\Models\Category;
+use Modules\Products\Events\ProductCreatedEvent;
 
 class ProductService
 {
@@ -49,7 +50,12 @@ public function createProduct(array $data, $imageFile = null)
         $data['image'] = $imageFile->store('products', 'public');
     }
 
-    return $this->productRepository->create($data);
+
+    $product = $this->productRepository->create($data);
+
+    event(new ProductCreatedEvent($product));
+
+    return $product;
 }
 
     public function updateProduct($uuid, array $data, $imageFile = null)
