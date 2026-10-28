@@ -6,12 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Modules\Shared\app\HasUuid;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable,HasUuid;
 
     protected $fillable = [
+        'uuid',
         'name',
         'email',
         'password',
@@ -32,4 +35,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(\Modules\Orders\Models\CartItem::class);
     }
+
+     public function getJWTCustomClaims()
+    {
+        return [
+            'email' => $this->email,
+            // يمكننا إضافة الأدوار هنا لتسريع التحقق في الوحدات الأخرى
+            'roles' => "{$this->role}",
+        ];
+    }
+
+     public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+  
 }

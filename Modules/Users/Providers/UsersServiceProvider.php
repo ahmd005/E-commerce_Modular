@@ -4,7 +4,10 @@ namespace Modules\Users\Providers;
 
 use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
-
+use Modules\Users\Repositries\Contracts\UserRepositoryInterface;
+use Modules\Users\Repositries\UserRepository;
+use Modules\Users\app\Contracts\UserContract;
+use Modules\Users\app\Infrastructure\UserService;
 class UsersServiceProvider extends ModuleServiceProvider
 {
     /**
@@ -43,4 +46,11 @@ class UsersServiceProvider extends ModuleServiceProvider
     // {
     //     $schedule->command('inspire')->hourly();
     // }
+    public function register(): void
+{
+    // ضع هنا الـ Bindings (مثل الـ Repositories والـ Contracts)
+    $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->bind(UserContract::class, UserService::class);
+
+}
 }

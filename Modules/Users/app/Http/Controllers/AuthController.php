@@ -4,53 +4,52 @@ namespace Modules\Users\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use Modules\Users\App\Http\Requests\LoginRequest;
+use Modules\Users\app\Http\Resources\UserResource;
+use Modules\Users\App\Http\Requests\RegisterRequest;
+use Modules\Users\Actions\AuthinticationLogical;
 class AuthController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+public function Register(RegisterRequest $request, AuthinticationLogical $auth)
     {
-        return view('users::index');
+        $data = $request->validated();
+
+
+        $user = $auth->Register($data);
+        
+        
+        return response()->json([UserResource::make($user['user']),$user['token']], 201);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+
+    public function login(LoginRequest $request, AuthinticationLogical $auth)
     {
-        return view('users::create');
+        $data = $request->validated();
+
+        return response()->json([UserResource::make($auth->Login($data)['user']), $auth->Login($data)['info_token']], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
+    public function logout( AuthinticationLogical $auth){
+        try{
+              
+            $auth->Expire();
+             return response()->json(['message' => 'تم تسجيل الخروج بنجاح'], 200);
 
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('users::show');
+        }
+        catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+            }
+
+            public function refresh(AuthinticationLogical $auth)
+{
+    try {
+
+        $tokens = $auth->Refresh();
+        return response()->json($tokens, 200);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 401);
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('users::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
+}
 }
