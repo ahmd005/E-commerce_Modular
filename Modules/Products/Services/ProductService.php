@@ -27,15 +27,6 @@ class ProductService
         return $this->productRepository->findById($uuid);
     }
 
-    // public function createProduct(array $data, $imageFile = null)
-    // {
-    //     if ($imageFile) {
-    //         $data['image'] = $imageFile->store('products', 'public');
-    //     }
-
-    //     return $this->productRepository->create($data);
-    // }
-
 
 public function createProduct(array $data, $imageFile = null)
 {
