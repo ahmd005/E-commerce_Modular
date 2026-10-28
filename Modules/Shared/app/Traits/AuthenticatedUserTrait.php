@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Orders\App\Traits;
+namespace Modules\Shared\App\Traits;
 
 use Illuminate\Support\Facades\Auth;
 use Exception;

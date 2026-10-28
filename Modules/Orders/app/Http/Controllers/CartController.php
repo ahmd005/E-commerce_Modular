@@ -11,10 +11,11 @@ use Modules\Orders\App\Http\Resources\CartItemResource;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Exception;
+use Modules\Shared\App\Traits\AuthenticatedUserTrait;
 
 class CartController extends Controller
 {
-    use ApiResponseTrait;
+    use ApiResponseTrait,AuthenticatedUserTrait;
 
     protected CartService $cartService;
 
@@ -30,7 +31,7 @@ class CartController extends Controller
     {
         try {
             // ملاحظة: تم استخدام معرف المستخدم الحالي من الـ auth بدل الرقم الثابت 1
-            $userId = $request->user()->id ?? 1; 
+            $userId = $this->getAuthenticatedUserId(); 
             $cart = $this->cartService->getCart($userId);
 
             return $this->successResponse([
@@ -49,7 +50,7 @@ class CartController extends Controller
     public function store(AddToCartRequest $request)
     {
         try {
-            $userId = $request->user()->id ?? 1;
+            $userId = $this->getAuthenticatedUserId();
             $cartItem = $this->cartService->addItem(
                 $userId,
                 $request->validated()
@@ -74,7 +75,7 @@ class CartController extends Controller
     public function update(UpdateCartRequest $request, $uuid)
     {
         try {
-            $userId = 1;
+            $userId = $this->getAuthenticatedUserId();
             $cartItem = $this->cartService->updateItemQuantity(
                 $uuid,
                 $request->validated()['quantity'],
@@ -99,7 +100,7 @@ class CartController extends Controller
     public function destroy(Request $request, $uuid)
     {
         try {
-            $userId =1;
+            $userId = $this->getAuthenticatedUserId();
             $this->cartService->deleteItem($uuid, $userId);
 
             return $this->successResponse(null, 'The cart item has been successfully deleted');
@@ -114,10 +115,10 @@ class CartController extends Controller
     /**
      * تفريغ السلة بالكامل للمستخدم الحالي
      */
-    public function clear(Request $request)
+    public function clear()
     {
         try {
-            $userId = $request->user()->id ?? 1;
+            $userId = $this->getAuthenticatedUserId();
             $this->cartService->emptyCart($userId);
 
             return $this->successResponse(null, 'Cart emptied successfully');
