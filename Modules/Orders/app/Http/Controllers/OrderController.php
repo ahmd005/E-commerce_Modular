@@ -12,11 +12,11 @@ use Modules\Orders\App\Http\Resources\OrderResource;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Exception;
+use Modules\Shared\App\Traits\AuthenticatedUserTrait;
 
 class OrderController extends Controller
 {
-    use ApiResponseTrait;
-    use PaginationMetaTrait;
+    use ApiResponseTrait,PaginationMetaTrait,AuthenticatedUserTrait;
 
     protected OrderService $orderService;
 
@@ -31,7 +31,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         try {
-            $userId = $request->user()->id ?? 1;
+            $userId = $this->getAuthenticatedUserId();
             $orders = $this->orderService->getUserOrders($userId);
 
             return $this->successResponse([
@@ -52,7 +52,7 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         try {
-            $userId = $request->user()->id ?? 1;
+            $userId = $this->getAuthenticatedUserId();
             $order = $this->orderService->placeOrder($userId);
 
             return $this->successResponse(
@@ -72,7 +72,7 @@ class OrderController extends Controller
     public function show(Request $request, $uuid)
     {
         try {
-            $userId = $request->user()->id ?? 1;
+            $userId = $this->getAuthenticatedUserId();
             $order = $this->orderService->getOrder($uuid, $userId);
 
             return $this->successResponse(
@@ -92,7 +92,7 @@ class OrderController extends Controller
     public function update(UpdateOrderStatusRequest $request, $uuid)
     {
         try {
-            $userId = $request->user()->id ?? 1;
+            $userId = $this->getAuthenticatedUserId();
             $order = $this->orderService->updateStatus(
                 $uuid,
                 $request->status(),
@@ -116,7 +116,7 @@ class OrderController extends Controller
     public function destroy(Request $request, $uuid)
     {
         try {
-            $userId = $request->user()->id ?? 1;
+            $userId = $this->getAuthenticatedUserId();
             $this->orderService->deleteOrder($uuid, $userId);
 
             return $this->successResponse(
