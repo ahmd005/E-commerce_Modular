@@ -51,7 +51,12 @@ return [
     */
 
     'channels' => [
-
+    'tracking' => [
+        'driver' => 'daily', // يقوم بإنشاء ملف جديد كل يوم (tracking-2023-10-25.log)
+        'path' => storage_path('logs/tracking.log'),
+        'level' => 'info',
+        'days' => 14, // الاحتفاظ بالسجلات لمدة 14 يوماً ثم حذفها تلقائياً
+    ],
         'stack' => [
             'driver' => 'stack',
             'channels' => explode(',', (string) env('LOG_STACK', 'single')),

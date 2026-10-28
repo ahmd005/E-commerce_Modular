@@ -3,5 +3,6 @@
     "Products": true,
     "Orders": true,
     "Notifications": true,
-    "Categories": true
+    "Categories": true,
+    "Shared": true
 }
