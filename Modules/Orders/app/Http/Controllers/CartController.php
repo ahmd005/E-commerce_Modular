@@ -2,7 +2,7 @@
 
 namespace Modules\Orders\App\Http\Controllers;
 
-use App\Events\ItemAddedToCart;
+use Modules\Orders\Events\ItemAddedToCart;
 use App\Http\Controllers\Controller;
 use Modules\Orders\App\Traits\ApiResponseTrait;
 use Modules\Orders\App\Http\Requests\AddToCartRequest;
