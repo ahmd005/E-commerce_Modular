@@ -22,12 +22,7 @@ class SendOrderCreatedNotification implements ShouldQueue
             user: $order->user,
             title: 'تم إنشاء طلبك',
             message: "تم إنشاء طلبك رقم {$order->id} بنجاح.",
-            type: 'order_created',
-            notifiable: $order,
-            data: [
-                'order_id' => $order->id,
-                'total'    => $order->total ?? null,
-            ],
+           
         );
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Modules\Notifications\Listeners;
 
-use App\Events\OrderStatusChanged;
+use Modules\Orders\Events\OrderStatusChanged;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Modules\Notifications\Actions\NotificationsAction;
 
@@ -27,12 +27,6 @@ class SendOrderStatusChangedNotification implements ShouldQueue
             user: $order->user,
             title: 'تحديث حالة الطلب',
             message: "حالة طلبك رقم {$order->id} تغيّرت إلى: {$event->newStatus}",
-            type: 'order_status_changed',
-            notifiable: $order,
-            data: [
-                'order_id'   => $order->id,
-                'new_status' => $event->newStatus,
-            ],
         );
     }
 }
