@@ -1,0 +1,45 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ecommerce-modular-app
+    container_name: laravel_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    networks:
+      - laravel
+
+  web:
+    image: nginx:alpine
+    container_name: laravel_nginx
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - laravel
+
+  inventory_service:
+    build:
+      context: ../OuterInventory
+      dockerfile: Dockerfile
+    container_name: node_inventory_service
+    restart: unless-stopped
+    ports:
+      - "50051:50051"
+    volumes:
+      - ../OuterInventory:/usr/src/app
+      - /usr/src/app/node_modules
+    extra_hosts:
+      host.docker.internal: host-gateway
+    networks:
+      - laravel
+
+networks:
+  laravel:
+    driver: bridge
