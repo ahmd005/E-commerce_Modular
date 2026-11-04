@@ -40,6 +40,32 @@ services:
     networks:
       - laravel
 
+  mysql:
+    image: mysql:8.0
+    container_name: laravel_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: your_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - laravel
+
+  adminer:
+    image: adminer
+    container_name: laravel_adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - laravel
+
 networks:
   laravel:
     driver: bridge
+
+volumes:
+  mysql_data:
