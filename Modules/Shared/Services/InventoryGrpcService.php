@@ -1,88 +1,108 @@
 <?php
 
-namespace Modules\Products\Services;
+namespace Modules\Shared\Services;
 
-use Illuminate\Support\Facades\Http;
 use Exception;
+use Grpc\ChannelCredentials;
+use Inventory\InventoryServiceClient;
+use Inventory\CreateProductRequest;
+use Inventory\UpdateStockRequest;
+use Inventory\DeleteProductRequest;
+use Inventory\StockRequest;
+use Inventory\PBEmpty;
 
 class InventoryGrpcService
 {
-    protected string $baseUrl;
+    protected InventoryServiceClient $client;
 
     public function __construct()
     {
-        $this->baseUrl = config('services.inventory.url', env('INVENTORY_SERVICE_URL', 'http://localhost:50051'));
+        $this->client = new InventoryServiceClient(
+            env('INVENTORY_GRPC_ADDR', 'localhost:50051'),
+            ['credentials' => ChannelCredentials::createInsecure()]
+        );
     }
 
-    /**
-     * مطابقة لـ CreateProduct في ملف الـ Proto
-     */
+    /** ينفّذ النداء، وإذا فشل يرمي Exception برسالة مفهومة */
+    private function run($call)
+    {
+        [$response, $status] = $call->wait();
+
+        if ($status->code !== \Grpc\STATUS_OK) {
+            if ($status->code === \Grpc\STATUS_UNAVAILABLE
+                || $status->code === \Grpc\STATUS_DEADLINE_EXCEEDED) {
+                throw new Exception('خدمة المستودع غير متاحة حالياً');
+            }
+            throw new Exception($status->details);
+        }
+        return $response;
+    }
+
+    private function opts(): array
+    {
+        return ['timeout' => 2000000]; // مهلة ثانيتين (بالميكروثانية)
+    }
+
+    private function toArray($p): array
+    {
+        return [
+            'id'       => $p->getId(),
+            'name'     => $p->getName(),
+            'sku'      => $p->getSku(),
+            'quantity' => $p->getQuantity(),
+            'in_stock' => $p->getInStock(),
+        ];
+    }
+
     public function createProduct(array $data)
     {
-        try {
-            $response = Http::post("{$this->baseUrl}/inventory.InventoryService/CreateProduct", [
-                'name' => $data['name'],
-                'sku' => $data['sku'] ?? 'SKU-' . uniqid(),
-                'initial_quantity' => $data['initial_quantity'] ?? 0,
-            ]);
+        $req = new CreateProductRequest();
+        $req->setName($data['name']);
+        $req->setSku($data['sku'] ?? 'SKU-' . uniqid());
+        $req->setInitialQuantity($data['initial_quantity'] ?? 0);
 
-            if ($response->failed()) {
-                throw new Exception($response->json('message') ?? 'فشل إنشاء المنتج في خدمة المستودع');
-            }
-
-            return $response->json();
-        } catch (Exception $e) {
-            throw new Exception("خطأ في الاتصال بخدمة المستودع: " . $e->getMessage());
-        }
+        return $this->toArray($this->run($this->client->CreateProduct($req, [], $this->opts())));
     }
 
-    /**
-     * مطابقة لـ UpdateStock في ملف الـ Proto
-     */
-    public function updateStock(string $productId, int $delta)
+    public function updateStock(string $uuid, int $delta)
     {
-        try {
-            Http::post("{$this->baseUrl}/inventory.InventoryService/UpdateStock", [
-                'product_id' => $productId,
-                'delta' => $delta,
-            ]);
-        } catch (Exception $e) {
-            // تسجيل الخطأ أو تجاهله حسب رغبتك
-        }
+        $req = new UpdateStockRequest();
+        $req->setProductId($uuid);
+        $req->setDelta($delta);
+
+        return $this->toArray($this->run($this->client->UpdateStock($req, [], $this->opts())));
     }
 
-    /**
-     * مطابقة لـ DeleteProduct في ملف الـ Proto
-     */
     public function deleteProduct(string $productId)
     {
         try {
-            Http::post("{$this->baseUrl}/inventory.InventoryService/DeleteProduct", [
-                'product_id' => $productId,
-            ]);
+            $req = new DeleteProductRequest();
+            $req->setProductId($productId);
+            $this->run($this->client->DeleteProduct($req, [], $this->opts()));
         } catch (Exception $e) {
-            // تسجيل الخطأ
+            // نفس السلوك القديم: تجاهل/تسجيل الخطأ فقط
         }
     }
 
-    /**
-     * مطابقة لـ ReserveStock (تُستخدم عند الطلبات)
-     */
     public function reserveStock(string $productId, int $quantity)
     {
-        try {
-            $response = Http::post("{$this->baseUrl}/inventory.InventoryService/ReserveStock", [
-                'product_id' => $productId,
-                'quantity' => $quantity,
-            ]);
+        $req = new StockRequest();
+        $req->setProductId($productId);
+        $req->setQuantity($quantity);
 
-            if ($response->failed()) {
-                throw new Exception($response->json('message') ?? 'الكمية غير كافية أو فشل الحجز');
-            }
+        return $this->toArray($this->run($this->client->ReserveStock($req, [], $this->opts())));
+    }
 
-            return $response->json();
-        } catch (Exception $e) {
-            throw new Exception("خطأ في حجز المخزون: " . $e->getMessage());
+    public function listProducts()
+    {
+        $res = $this->run($this->client->ListProducts(new PBEmpty(), [], $this->opts()));
+
+        $out = [];
+        foreach ($res->getData() as $p) {
+            $row = $this->toArray($p);
+            $row['product_id'] = $row['sku']; // نفس الحقل اللي كان يرجع بالنسخة القديمة
+            $out[] = $row;
         }
+        return $out;
     }
 }
