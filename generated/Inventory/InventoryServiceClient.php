@@ -40,6 +40,12 @@ class InventoryServiceClient extends \Grpc\BaseStub
             $argument, ['\Inventory\ProductResponse', 'decode'], $metadata, $options);
     }
 
+    public function CheckStock(\Inventory\StockRequest $argument, $metadata = [], $options = [])
+    {
+        return $this->_simpleRequest('/inventory.InventoryService/CheckStock',
+            $argument, ['\Inventory\ProductResponse', 'decode'], $metadata, $options);
+    }
+
     public function ListProducts(\Inventory\PBEmpty $argument, $metadata = [], $options = [])
     {
         return $this->_simpleRequest('/inventory.InventoryService/ListProducts',
