@@ -84,6 +84,9 @@ class InventoryGrpcService
         }
     }
 
+    /**
+     * حجز المخزون (ReserveStock)
+     */
     public function reserveStock(string $productId, int $quantity)
     {
         $req = new StockRequest();
@@ -91,6 +94,36 @@ class InventoryGrpcService
         $req->setQuantity($quantity);
 
         return $this->toArray($this->run($this->client->ReserveStock($req, [], $this->opts())));
+    }
+
+    /**
+     * تحرير وإلغاء حجز المخزون (ReleaseStock) - المضافة حديثاً لتطابق Node.js
+     */
+    public function releaseStock(string $productId, int $quantity)
+    {
+        $req = new StockRequest();
+        $req->setProductId($productId);
+        $req->setQuantity($quantity);
+
+        return $this->toArray($this->run($this->client->ReleaseStock($req, [], $this->opts())));
+    }
+
+    /**
+     * التحقق من توفر المخزون (CheckStock) - المضافة حديثاً لتطابق Node.js
+     */
+    /**
+     * التحقق من توفر الكمية في المخزون (CheckStock)
+     */
+    public function checkStock(string $productId, int $quantity): bool
+    {
+        $req = new StockRequest();
+        $req->setProductId($productId);
+        $req->setQuantity($quantity);
+
+        $res = $this->run($this->client->CheckStock($req, [], $this->opts()));
+        
+        // إرجاع قيمة boolean صريحة بناءً على حقل in_stock القادم من سيرفر الـ gRPC
+        return (bool) $res->getInStock();
     }
 
     public function listProducts()
