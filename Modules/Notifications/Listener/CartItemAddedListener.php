@@ -2,10 +2,9 @@
 
 namespace Modules\Notifications\Listeners;
 
-use App\Events\ItemAddedToCart;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Modules\Notifications\Actions\NotificationsAction;
-
+use Modules\Orders\Events\ItemAddedToCart;
 class SendCartItemAddedNotification implements ShouldQueue
 {
     public $queue = 'notifications';
@@ -23,12 +22,7 @@ class SendCartItemAddedNotification implements ShouldQueue
             user: $cartItem->cart->user,   // عدّل حسب structure الحقيقي
             title: 'تمت إضافة منتج إلى السلة',
             message: 'تمت إضافة منتج جديد إلى سلة مشترياتك.',
-            type: 'cart_item_added',
-            notifiable: $cartItem,
-            data: [
-                'cart_item_id' => $cartItem->id,
-                'product_id'   => $cartItem->product_id ?? null,
-            ],
+            
         );
     }
 }

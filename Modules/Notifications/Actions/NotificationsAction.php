@@ -18,19 +18,12 @@ class NotificationsAction
         User $user,
         string $title,
         string $message,
-        string $type,
-        ?Model $notifiable = null,
-        array $data = []
     ): Notification {
         return $this->notificationModel->create([
             'user_id'         => $user->id,
             'title'           => $title,
             'message'         => $message,
-            'type'            => $type,
-            'notifiable_type' => $notifiable?->getMorphClass(),
-            'notifiable_id'   => $notifiable?->getKey(),
-            'data'            => $data,
-        ]);
+                    ]);
     }
 
     public function markAsRead($uuid): Notification
