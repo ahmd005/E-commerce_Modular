@@ -95,11 +95,9 @@ class OrderController extends Controller
     public function update(UpdateOrderStatusRequest $request, $uuid)
     {
         try {
-            $userId = $this->getAuthenticatedUserId();
             $order = $this->orderService->updateStatus(
                 $uuid,
-                $request->status(),
-                $userId
+                $request->status()
             );
             event(new OrderStatusChanged($order, $order->status->value));
             return $this->successResponse(

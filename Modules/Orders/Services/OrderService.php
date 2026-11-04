@@ -86,9 +86,9 @@ class OrderService
     /**
      * @throws Exception
      */
-    public function updateStatus(string $uuid, OrderStatus $newStatus, int $userId)
+    public function updateStatus(string $uuid, OrderStatus $newStatus)
     {
-        $order = $this->orderRepository->findUserOrder($uuid, $userId);
+        $order = $this->orderRepository->findOrderByUuid($uuid);
 
         if (! $order->status->canTransitionTo($newStatus)) {
             throw new Exception('Invalid order status transition', 422);
