@@ -2,8 +2,8 @@
 
 namespace Modules\Orders\App\Http\Controllers;
 
-use App\Events\OrderCreated;
-use App\Events\OrderStatusChanged;
+use Modules\Orders\Events\OrderCreated;
+use Modules\Orders\Events\OrderStatusChanged;
 use App\Http\Controllers\Controller;
 use Modules\Orders\App\Traits\ApiResponseTrait;
 use Modules\Orders\App\Traits\PaginationMetaTrait;
@@ -95,11 +95,9 @@ class OrderController extends Controller
     public function update(UpdateOrderStatusRequest $request, $uuid)
     {
         try {
-            $userId = $this->getAuthenticatedUserId();
             $order = $this->orderService->updateStatus(
                 $uuid,
-                $request->status(),
-                $userId
+                $request->status()
             );
             event(new OrderStatusChanged($order, $order->status->value));
             return $this->successResponse(

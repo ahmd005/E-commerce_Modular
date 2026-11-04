@@ -26,6 +26,13 @@ class OrderRepository implements OrderRepositoryInterface
             ->firstOrFail();
     }
 
+    public function findOrderByUuid(string $uuid)
+    {
+        return Order::with(self::RELATIONS)
+            ->where('uuid', $uuid)
+            ->firstOrFail();
+    }
+
     public function create(array $data)
     {
         return Order::create($data);

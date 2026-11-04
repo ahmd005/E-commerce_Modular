@@ -10,19 +10,25 @@ use Modules\Orders\Models\Order;
 use Modules\Orders\Repositories\CartRepositoryInterface;
 use Modules\Orders\Repositories\OrderRepositoryInterface;
 use Exception;
+use Modules\Shared\Services\InventoryGrpcService;
 
 class OrderService
 {
     protected OrderRepositoryInterface $orderRepository;
 
     protected CartRepositoryInterface $cartRepository;
+    protected InventoryGrpcService $inventoryService;
+
 
     public function __construct(
         OrderRepositoryInterface $orderRepository,
-        CartRepositoryInterface $cartRepository
+        CartRepositoryInterface $cartRepository,
+        InventoryGrpcService $inventoryService
+
     ) {
         $this->orderRepository = $orderRepository;
         $this->cartRepository = $cartRepository;
+        $this->inventoryService = $inventoryService;
     }
 
     public function getUserOrders(int $userId)
@@ -51,6 +57,16 @@ class OrderService
             throw new Exception('Cart is empty', 422);
         }
 
+        foreach ($cartItems as $item) {
+            $productUuid = $item->product->uuid;
+            $quantity = $item->quantity;
+            try {
+                $this->inventoryService->reserveStock($productUuid, $quantity);
+            } catch (Exception $e) {
+                throw new Exception("فشل حجز المخزون للمنتج {$item->product->name}: " . $e->getMessage(), 422);
+            }
+        }
+
         return DB::transaction(function () use ($userId, $cartItems): Order {
 
             $order = $this->orderRepository->create([
@@ -70,12 +86,25 @@ class OrderService
     /**
      * @throws Exception
      */
-    public function updateStatus(string $uuid, OrderStatus $newStatus, int $userId)
+    public function updateStatus(string $uuid, OrderStatus $newStatus)
     {
-        $order = $this->orderRepository->findUserOrder($uuid, $userId);
+        $order = $this->orderRepository->findOrderByUuid($uuid);
 
         if (! $order->status->canTransitionTo($newStatus)) {
             throw new Exception('Invalid order status transition', 422);
+        }
+
+        // إذا تم تحويل حالة الطلب إلى ملغى (Cancelled)، نعيد الكميات إلى المخزون
+        if ($newStatus === OrderStatus::Cancelled) {
+            foreach ($order->items as $item) {
+                try {
+                    $productUuid = $item->product->uuid ?? $item->product->sku;
+                    $this->inventoryService->releaseStock($productUuid, $item->quantity);
+                } catch (Exception $e) {
+                    // يمكنك تسجيل الخطأ أو متابعة الإلغاء حسب رغبتك، والأفضل رمي استثناء إذا فشلت الاستعادة
+                    throw new Exception("فشل إعادة المخزون للمنتج {$item->product->name}: " . $e->getMessage(), 422);
+                }
+            }
         }
 
         return $this->orderRepository->updateStatus($order, $newStatus);
@@ -90,6 +119,15 @@ class OrderService
 
         if (! $order->status->isDeletable()) {
             throw new Exception('Order cannot be deleted in its current status', 422);
+        }
+
+        foreach ($order->items as $item) {
+            try {
+                $productUuid = $item->product->uuid ?? $item->product->sku;
+                $this->inventoryService->releaseStock($productUuid, $item->quantity);
+            } catch (Exception $e) {
+                throw new Exception("فشل إعادة المخزون أثناء حذف الطلب للمنتج {$item->product->name}: " . $e->getMessage(), 422);
+            }
         }
 
         return $this->orderRepository->delete($order);
