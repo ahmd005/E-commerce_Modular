@@ -1,56 +1,60 @@
 <?php
 
-namespace Modules\Notifications\App\Http\Controllers;
+namespace Modules\Notifications\app\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Modules\Notifications\Actions\NotificationsAction;
+use Modules\Notifications\Reposiotires\Contracts\NotificationRepositoryInterface;
+use Modules\Notifications\app\Http\Resources\NotificationResource;
+use Modules\Notifications\Models\Notification;
+use Modules\Shared\App\Traits\AuthenticatedUserTrait;
 
 class NotificationsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    use AuthenticatedUserTrait;
+
+    public function __construct(
+        private NotificationRepositoryInterface $repository,
+        private NotificationsAction $notifications,
+    ) {}
+
+    public function index(Request $request)
     {
-        return view('notifications::index');
+        $notifications = $this->repository->paginateForUser(
+            userId: $this->getAuthenticatedUserId(),
+            unreadOnly: $request->boolean('unread_only'),
+        );
+
+        return NotificationResource::collection($notifications);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function unreadCount(): JsonResponse
     {
-        return view('notifications::create');
+        $count = $this->repository->unreadCountForUser(
+            $this->getAuthenticatedUserId(),
+        );
+
+        return response()->json(['count' => $count]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    public function markAsRead( $uuid): NotificationResource
     {
-        return view('notifications::show');
+        $notification = $this->notifications->markAsRead(
+             $uuid,
+             $this->getAuthenticatedUserId(),
+        );
+
+        return new NotificationResource($notification);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
+    public function markAllAsRead(): JsonResponse
     {
-        return view('notifications::edit');
+        $this->notifications->markAllAsRead(
+            $this->getAuthenticatedUserId()
+        );
+
+        return response()->json(['message' => 'All notifications marked as read']);
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
 }
