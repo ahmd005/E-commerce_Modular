@@ -12,7 +12,7 @@ trait AuthenticatedUserTrait
      *
      * @throws Exception
      */
-    protected function getAuthenticatedUserId(): int
+    protected function getAuthenticatedUserId()
     {
         // استخدام guard الـ api الخاص بـ JWT لجلب المستخدم الحالي
         $user = auth('api')->user();

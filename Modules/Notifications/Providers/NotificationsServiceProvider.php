@@ -4,7 +4,7 @@ namespace Modules\Notifications\Providers;
 
 use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
-
+use Modules\Notifications\Providers\NotificationRepositoryServiceProvider;
 class NotificationsServiceProvider extends ModuleServiceProvider
 {
     /**
@@ -43,4 +43,15 @@ class NotificationsServiceProvider extends ModuleServiceProvider
     // {
     //     $schedule->command('inspire')->hourly();
     // }
+    public function register(): void
+{
+    $this->app->register(EventServiceProvider::class);
+        $this->app->register(NotificationRepositoryServiceProvider::class);
+
+}
+public function boot(): void
+    {
+        // تحميل routes الموديول
+        $this->loadRoutesFrom(base_path('Modules/Notifications/routes/api.php'));
+    }
 }
