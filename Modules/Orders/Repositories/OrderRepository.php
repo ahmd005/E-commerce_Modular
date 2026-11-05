@@ -18,6 +18,14 @@ class OrderRepository implements OrderRepositoryInterface
             ->paginate($perPage);
     }
 
+    // جلب جميع الطلبات الموجودة لجميع المستخدمين مع تقسيم الصفحات (Pagination)
+    public function paginateAllOrders(int $perPage)
+    {
+        return Order::with(self::RELATIONS)
+            ->latest()
+            ->paginate($perPage);
+    }
+
     public function findUserOrder(string $uuid, int $userId)
     {
         return Order::with(self::RELATIONS)

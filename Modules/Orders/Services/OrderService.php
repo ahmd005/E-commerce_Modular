@@ -39,6 +39,13 @@ class OrderService
         );
     }
 
+    public function getAllOrders()
+    {
+        return $this->orderRepository->paginateAllOrders(
+            (int) config('orders.per_page', 15)
+        );
+    }
+
     public function getOrder(string $uuid, int $userId)
     {
         return $this->orderRepository->findUserOrder($uuid, $userId);
