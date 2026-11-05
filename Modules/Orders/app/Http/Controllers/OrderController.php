@@ -13,6 +13,7 @@ use Modules\Orders\Services\OrderService;
 use Modules\Orders\App\Http\Resources\OrderResource;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use InvalidArgumentException;
 use Exception;
 use Modules\Shared\App\Traits\AuthenticatedUserTrait;
 
@@ -51,12 +52,15 @@ class OrderController extends Controller
     public function all(Request $request)
     {
         try {
-            $orders = $this->orderService->getAllOrders();
+            $status = $request->query('status', 'all');
+            $orders = $this->orderService->getAllOrders($status);
 
             return $this->successResponse([
                 'orders'     => OrderResource::collection($orders->items()),
                 'pagination' => $this->paginationMeta($orders),
             ], 'All orders retrieved successfully');
+        } catch (InvalidArgumentException $e) {
+            return $this->errorResponse('Invalid order status: ' . $e->getMessage(), 422);
         } catch (Exception $e) {
             return $this->errorResponse('Failed to retrieve all orders: ' . $e->getMessage(), 500);
         }
