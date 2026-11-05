@@ -10,6 +10,7 @@ use Modules\Orders\Models\Order;
 use Modules\Orders\Repositories\CartRepositoryInterface;
 use Modules\Orders\Repositories\OrderRepositoryInterface;
 use Exception;
+use InvalidArgumentException;
 use Modules\Shared\Services\InventoryGrpcService;
 
 class OrderService
@@ -39,10 +40,21 @@ class OrderService
         );
     }
 
-    public function getAllOrders()
+    public function getAllOrders(?string $status = null)
     {
+        $statusFilter = null;
+
+        if ($status !== null && strtolower($status) !== 'all') {
+            $statusFilter = OrderStatus::tryFrom(strtolower($status));
+
+            if ($statusFilter === null) {
+                throw new InvalidArgumentException('Invalid order status');
+            }
+        }
+
         return $this->orderRepository->paginateAllOrders(
-            (int) config('orders.per_page', 15)
+            (int) config('orders.per_page', 15),
+            $statusFilter
         );
     }
 

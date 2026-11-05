@@ -8,7 +8,7 @@ use Modules\Orders\Models\Order;
 interface OrderRepositoryInterface
 {
     public function paginateUserOrders(int $userId, int $perPage);
-    public function paginateAllOrders(int $perPage);
+    public function paginateAllOrders(int $perPage, ?OrderStatus $status = null);
     public function findUserOrder(string $uuid, int $userId);
     public function findOrderByUuid(string $uuid);
     public function create(array $data);
