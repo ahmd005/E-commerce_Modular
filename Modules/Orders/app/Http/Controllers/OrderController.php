@@ -18,7 +18,7 @@ use Modules\Shared\App\Traits\AuthenticatedUserTrait;
 
 class OrderController extends Controller
 {
-    use ApiResponseTrait,PaginationMetaTrait,AuthenticatedUserTrait;
+    use ApiResponseTrait, PaginationMetaTrait, AuthenticatedUserTrait;
 
     protected OrderService $orderService;
 
@@ -42,6 +42,23 @@ class OrderController extends Controller
             ], 'Orders retrieved successfully');
         } catch (Exception $e) {
             return $this->errorResponse('Failed to retrieve orders: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Display all orders for all users (with pagination)
+     */
+    public function all(Request $request)
+    {
+        try {
+            $orders = $this->orderService->getAllOrders();
+
+            return $this->successResponse([
+                'orders'     => OrderResource::collection($orders->items()),
+                'pagination' => $this->paginationMeta($orders),
+            ], 'All orders retrieved successfully');
+        } catch (Exception $e) {
+            return $this->errorResponse('Failed to retrieve all orders: ' . $e->getMessage(), 500);
         }
     }
 
