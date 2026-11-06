@@ -23,22 +23,32 @@ class ProductController extends Controller
     }
 
     // عرض قائمة المنتجات (مع دعم البحث والتصفية وتقسيم الصفحات)
-    public function index(Request $request)
-    {
-        $products = $this->productService->getAllProducts($request);
-       // return $this->successResponse(ProductResource::collection($products), 'تم جلب المنتجات بنجاح');
-    //    return ProductResource::collection($products)->additional([
-    //     'status' => true,
-    //     'message' => 'تم جلب المنتجات بنجاح',
-    // ]);
+    // public function index(Request $request)
+    // {
+    //     $products = $this->productService->getAllProducts($request);
+    //    // return $this->successResponse(ProductResource::collection($products), 'تم جلب المنتجات بنجاح');
+    // //    return ProductResource::collection($products)->additional([
+    // //     'status' => true,
+    // //     'message' => 'تم جلب المنتجات بنجاح',
+    // // ]);
 
-    // استخدام الـ collection الخاصة بالريترس بشكل يدوي وآمن بدون تضارب
-       return response()->json([
-            'status' => true,
-            'message' => 'تم جلب المنتجات بنجاح',
-            'data' => $products
-        ]);
-    }
+    // // استخدام الـ collection الخاصة بالريترس بشكل يدوي وآمن بدون تضارب
+    //    return response()->json([
+    //         'status' => true,
+    //         'message' => 'تم جلب المنتجات بنجاح',
+    //         'data' => $products
+    //     ]);
+    // }
+
+    public function index(Request $request)
+{
+    $products = $this->productService->getAllProducts($request);
+    
+    return ProductResource::collection($products)->additional([
+        'status' => true,
+        'message' => 'تم جلب المنتجات بنجاح',
+    ]);
+}
 
     // إضافة منتج جديد
     public function store(StoreProductRequest $request)
