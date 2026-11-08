@@ -1,9 +1,7 @@
 <?php
 
-use App\Providers\AppServiceProvider;
-
 return [
-    AppServiceProvider::class,
-        Modules\Users\Providers\RouteServiceProvider::class,
-        
+    App\Providers\AppServiceProvider::class,
+    App\Providers\TelescopeServiceProvider::class,
+    Modules\Users\Providers\RouteServiceProvider::class,
 ];
