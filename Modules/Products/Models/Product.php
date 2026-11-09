@@ -2,12 +2,14 @@
 
 namespace Modules\Products\Models;
 
+use App\Models\Concerns\ReplicatesToReadDb;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory,ReplicatesToReadDb;
 
     protected $fillable = [
         'category_id',
