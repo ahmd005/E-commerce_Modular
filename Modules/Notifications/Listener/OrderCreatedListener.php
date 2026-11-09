@@ -2,7 +2,7 @@
 
 namespace Modules\Notifications\Listeners;
 
-use App\Events\OrderCreated;
+use Modules\Orders\Events\OrderCreated;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Modules\Notifications\Actions\NotificationsAction;
 
