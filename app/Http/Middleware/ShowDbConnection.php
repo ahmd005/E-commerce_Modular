@@ -13,7 +13,11 @@ class ShowDbConnection
     {
         $response = $next($request);
 
-        if (! config('app.debug') || ! $request->hasHeader('X-Debug-Db')) {
+        // if (! config('app.debug') || ! $request->hasHeader('X-Debug-Db')) {
+        //     return $response;
+        // }
+
+        if (! config('app.debug')) {
             return $response;
         }
 
