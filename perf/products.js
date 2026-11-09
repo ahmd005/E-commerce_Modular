@@ -40,7 +40,10 @@ export function setup() {
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const ok = (r) => check(r, { 'status 200': (x) => x.status === 200 });
 
-export function list()    { ok(http.get(`${BASE}/products?page=${1 + Math.floor(Math.random() * 20)}`)); }
+export function list()    { ok(http.get(`${BASE}/products?page=${1 + Math.floor(Math.random() * 10)}`)); }
 export function filter(d) { ok(http.get(`${BASE}/products?category_uuid=${pick(d.categoryUuids)}`)); }
 export function search()  { ok(http.get(`${BASE}/products?search=${encodeURIComponent(pick(WORDS))}`)); }
 export function catList() { ok(http.get(`${BASE}/categories`)); }
+
+
+
