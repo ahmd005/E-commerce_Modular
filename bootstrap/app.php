@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ETagMiddleware;
 use App\Http\Middleware\ShowDbConnection;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->api(append: [
             ShowDbConnection::class,
+            ETagMiddleware::class
         ]);
     })
 
