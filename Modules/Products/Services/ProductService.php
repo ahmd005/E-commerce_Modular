@@ -171,4 +171,29 @@ try {
 
         return $this->productRepository->delete($uuid);
     }
+
+
+
+
+
+
+    public function getAllProductsV2(Request $request)
+{
+    $perPage = min((int) $request->get('per_page', 10), 100);
+
+    $query = Product::with('category')->orderBy('id');
+
+    if ($request->filled('category_uuid')) {
+        $categoryId = Category::where('uuid', $request->category_uuid)->value('id');
+        $query->where('category_id', $categoryId ?? 0);
+    }
+
+    if ($request->filled('search')) {
+        $query->where('name', 'like', '%' . $request->search . '%');
+    }
+
+    return $query->paginate($perPage);
+}
+
+
 }

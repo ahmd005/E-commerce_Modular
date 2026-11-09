@@ -10,6 +10,8 @@ use Modules\Products\App\Http\Requests\UpdateProductRequest;
 use Modules\Products\Services\ProductService;
 use Modules\Products\App\Http\Resources\ProductResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Modules\Products\Services\ProductCache;
 
 class ProductController extends Controller
 {
@@ -86,4 +88,44 @@ class ProductController extends Controller
         $this->productService->deleteProduct($uuid);
         return $this->successResponse(null, 'تم حذف المنتج بنجاح');
     }
+
+
+    
+
+// --- دوال النسخة الثانية (v2) للمنتجات مع Redis Caching الديناميكي ---
+public function indexV2(Request $request)
+{
+    $params = $request->only(['page', 'per_page', 'search', 'category_uuid']);
+    $key = 'v2:products:' . ProductCache::version() . ':' . md5(json_encode($params));
+
+    $products = Cache::remember($key, now()->addMinutes(30), function () use ($request) {
+        return $this->productService->getAllProductsV2($request);
+    });
+
+    return ProductResource::collection($products)->additional([
+        'status' => true,
+        'message' => 'تم جلب المنتجات بنجاح',
+    ]);
+}
+
+public function storeV2(StoreProductRequest $request)
+{
+    $product = $this->productService->createProduct($request->validated(), $request->file('image'));
+    ProductCache::bump();
+    return $this->successResponse(new ProductResource($product), 'تم إنشاء المنتج بنجاح', 201);
+}
+
+public function updateV2(UpdateProductRequest $request, $uuid)
+{
+    $product = $this->productService->updateProduct($uuid, $request->validated(), $request->file('image'));
+    ProductCache::bump();
+    return $this->successResponse(new ProductResource($product), 'تم تحديث المنتج بنجاح');
+}
+
+public function destroyV2($uuid)
+{
+    $this->productService->deleteProduct($uuid);
+    ProductCache::bump();
+    return $this->successResponse(null, 'تم حذف المنتج بنجاح');
+}
 }
