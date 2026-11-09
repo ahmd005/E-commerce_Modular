@@ -32,7 +32,6 @@ class NotificationsAction
         if (! $notification->is_read) {
             $notification->update([
                 'is_read' => true,
-                'read_at' => now(),
             ]);
         }
 
