@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Modules\Products\Database\Seeders\ProductsDatabaseSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,10 +14,16 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      */
-    public function run(): void
+   public function run(): void
     {
+        // استدعاء سيدر الأدمن القديم
         $this->call([
             AdminUserSeeder::class,
+        ]);
+
+        // استدعاء سيدر المنتجات والتصنيفات الضخم لاختبار الأداء
+        $this->call([
+            ProductsDatabaseSeeder::class,
         ]);
     }
 }

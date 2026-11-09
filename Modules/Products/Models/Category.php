@@ -33,4 +33,10 @@ public function getRouteKeyName()
     return 'uuid';
 }
 
+
+protected static function newFactory()
+{
+    return \Modules\Products\Database\Factories\CategoryFactory::new();
+}
+
 }
