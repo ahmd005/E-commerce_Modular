@@ -23,7 +23,6 @@ class ShowDbConnection
         $response->headers->set('X-DB-Read',  implode(',', $summary['read_from'])  ?: '-');
         $response->headers->set('X-DB-Write', implode(',', $summary['write_to'])   ?: '-');
 
-        // داخل الـ JSON نفسه
         if ($response instanceof JsonResponse) {
             $data = $response->getData(true);
             if (is_array($data)) {
