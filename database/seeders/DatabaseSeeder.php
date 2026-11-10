@@ -6,7 +6,9 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Modules\Products\Database\Seeders\ProductsDatabaseSeeder;
-
+use Modules\Orders\Database\Seeders\OrderSeeder;
+use Modules\Orders\Database\Seeders\CartItemSeeder;
+use Modules\Users\Database\Seeders\UserSeeder;
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
@@ -22,8 +24,12 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // استدعاء سيدر المنتجات والتصنيفات الضخم لاختبار الأداء
-        $this->call([
-            ProductsDatabaseSeeder::class,
-        ]);
+      $this->call([
+        AdminUserSeeder::class,
+        UserSeeder::class,              // ← قبل OrderSeeder
+        ProductsDatabaseSeeder::class,
+        OrderSeeder::class,
+        CartItemSeeder::class,
+    ]);
     }
 }

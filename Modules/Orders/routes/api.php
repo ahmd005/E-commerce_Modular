@@ -20,3 +20,18 @@ Route::prefix('orders')->controller(OrderController::class)->group(function () {
     Route::put('/v1/{uuid}', 'update')->whereUuid('uuid')->middleware(AdminMiddleware::class);
     Route::delete('/v1/{uuid}', 'destroy')->whereUuid('uuid');
 });
+Route::prefix('cart')->controller(CartController::class)->group(function () {
+    Route::get('/v2', 'index2');
+    Route::post('/v2', 'store2');
+    Route::put('/v2/{uuid}', 'update2')->whereUuid('uuid');
+    Route::delete('/v2/{uuid}', 'destroy2')->whereUuid('uuid');
+    Route::delete('/v2/clear', 'clear2');
+});
+Route::prefix('orders')->controller(OrderController::class)->group(function () {
+    Route::get('/v2', 'index2');
+    Route::get('/v2/all', 'all2')->middleware(AdminMiddleware::class);
+    Route::post('/v2', 'store2');
+    Route::get('/v2/{uuid}', 'show2')->whereUuid('uuid');
+    Route::put('/v2/{uuid}', 'update2')->whereUuid('uuid')->middleware(AdminMiddleware::class);
+    Route::delete('/v2/{uuid}', 'destroy2')->whereUuid('uuid');
+});
