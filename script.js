@@ -13,8 +13,8 @@ export const options = {
   },
 };
 
-const productUuid = '5e1e1309-8e57-4216-aea7-9a10cffc7ed5';
-const quantity = 2;
+const productUuid = 'fb800a62-d07a-44a5-9d4c-459be2c1c663';
+const quantity = 300;
 
 const tokens = [
   'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL0VfY29tbWVyY2UvdjEvYXV0aC9yZWdpc3RlciIsImlhdCI6MTc5MzgyNjM4MiwiZXhwIjoxNzkzODI5OTgyLCJuYmYiOjE3OTM4MjYzODIsImp0aSI6ImZkWGZUOUlDaUI4TVZ4ZWEiLCJzdWIiOiIzIiwicHJ2IjoiMzRjZWM3ZWMyOTY1NmY1NGQyMzg4MDM3MDBjYjNmYTYxYTYzMjk4YSIsImVtYWlsIjoiYWJkQGdtYWlsLmNvbSIsInJvbGVzIjoiY3VzdG9tZXIifQ.h0IohOXzvc1PgxFUJMRYT2cTGdg3-SA6AOs6mNYE3m4',
