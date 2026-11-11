@@ -7,25 +7,28 @@ use Illuminate\Http\Request;
 
 class ProductRepository implements ProductRepositoryInterface
 {
+    
     public function getAll(Request $request)
-    {
-        $query = Product::with('category');
+{
+    // ترتيب المنتجات تنازلياً بحيث يظهر المنتج الجديد أُفقيّاً في المقدمة (الأحدث أولاً)
+    $query = Product::with('category')->latest();
 
-        // ميزة إضافية: التصفية حسب التصنيف (Category Filter)
-        if ($request->has('category_uuid')) {
+    // ميزة إضافية: التصفية حسب التصنيف (Category Filter)
+    if ($request->has('category_uuid')) {
         $query->whereHas('category', function ($q) use ($request) {
             $q->where('uuid', $request->category_uuid);
         });
     }
 
-        // التصفية بالبحث عن الاسم
-        if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        // تقسيم الصفحات (Pagination)
-        return $query->paginate($request->get('per_page', 10));
+    // التصفية بالبحث عن الاسم
+    if ($request->has('search')) {
+        $query->where('name', 'like', '%' . $request->search . '%');
     }
+
+    // تقسيم الصفحات (Pagination) مع تحديد الحد الأقصى للأمان
+    $perPage = min((int) $request->get('per_page', 10), 100);
+    return $query->paginate($perPage);
+}
 
 
     public function findById($uuid)

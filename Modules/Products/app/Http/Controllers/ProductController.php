@@ -24,24 +24,6 @@ class ProductController extends Controller
         $this->productService = $productService;
     }
 
-    // عرض قائمة المنتجات (مع دعم البحث والتصفية وتقسيم الصفحات)
-    // public function index(Request $request)
-    // {
-    //     $products = $this->productService->getAllProducts($request);
-    //    // return $this->successResponse(ProductResource::collection($products), 'تم جلب المنتجات بنجاح');
-    // //    return ProductResource::collection($products)->additional([
-    // //     'status' => true,
-    // //     'message' => 'تم جلب المنتجات بنجاح',
-    // // ]);
-
-    // // استخدام الـ collection الخاصة بالريترس بشكل يدوي وآمن بدون تضارب
-    //    return response()->json([
-    //         'status' => true,
-    //         'message' => 'تم جلب المنتجات بنجاح',
-    //         'data' => $products
-    //     ]);
-    // }
-
     public function index(Request $request)
 {
     $products = $this->productService->getAllProducts($request);
@@ -96,7 +78,8 @@ class ProductController extends Controller
 public function indexV2(Request $request)
 {
     $params = $request->only(['page', 'per_page', 'search', 'category_uuid']);
-    $key = 'v2:products:' . ProductCache::version() . ':' . md5(json_encode($params));
+    ksort($params);
+    $key = 'v2:products:version:' . ProductCache::version() . ':' . md5(json_encode($params));
 
     $products = Cache::remember($key, now()->addMinutes(30), function () use ($request) {
         return $this->productService->getAllProductsV2($request);
