@@ -33,7 +33,7 @@ class ProductService
     public function getAllProducts(Request $request)
     {
         // 1. جلب استعلام المنتجات محلياً مع الـ Pagination مباشرة
-        $paginatedProducts = Product::with('category')
+        $paginatedProducts = Product::with('category')->latest()
             ->when($request->has('category_uuid'), function ($q) use ($request) {
                 $q->whereHas('category', function ($sub) use ($request) {
                     $sub->where('uuid', $request->category_uuid);
@@ -181,7 +181,7 @@ try {
 {
     $perPage = min((int) $request->get('per_page', 10), 100);
 
-    $query = Product::with('category')->orderBy('id');
+    $query = Product::with('category')->orderBy('id', 'desc');
 
     if ($request->filled('category_uuid')) {
         $categoryId = Category::where('uuid', $request->category_uuid)->value('id');

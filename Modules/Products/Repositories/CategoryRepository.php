@@ -8,7 +8,7 @@ class CategoryRepository implements CategoryRepositoryInterface
 {
     public function all()
     {
-        return Category::all();
+        return Category::orderBy('id', 'desc')->get();
     }
 
 

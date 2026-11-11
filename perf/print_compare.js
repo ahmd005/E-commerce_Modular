@@ -18,3 +18,24 @@ rows.push({ 'Test Case': '304 Responses (ETag)', 'Before (v1)': before.etag_304,
 
 console.log('\n========== Performance Comparison: Before (v1) vs After (v2) ==========\n');
 console.table(rows);
+
+
+
+
+// php artisan cache:clear
+
+// k6 run -e LABEL=v1 -e BASE_URL=http://127.0.0.1:8000/api/v1 perf/compare.js
+
+// k6 run -e LABEL=v2 -e BASE_URL=http://127.0.0.1:8000/api/v2 perf/compare.js
+
+// node perf/print_compare.js
+
+// http://localhost:4040
+
+// php artisan db:sync-replica  
+
+// php artisan db:fresh-all --seed
+
+// node src/server.js 
+
+// ngrok http 8000 
