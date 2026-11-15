@@ -13,6 +13,8 @@ use Exception;
 use InvalidArgumentException;
 use Modules\Orders\Events\OrderUpdated;
 use Modules\Shared\Services\InventoryGrpcService;
+use Modules\Orders\App\Jobs\SendOrderConfirmationEmailJob;
+use Modules\Orders\App\Jobs\SendOrderStatusUpdatedEmailJob;
 
 class OrderService
 {
@@ -87,7 +89,7 @@ class OrderService
             }
         }
 
-        return DB::transaction(function () use ($userId, $cartItems): Order {
+        $order= DB::transaction(function () use ($userId, $cartItems): Order {
 
             $order = $this->orderRepository->create([
                 'user_id' => $userId,
@@ -99,9 +101,17 @@ class OrderService
 
             $this->cartRepository->clearCart($userId);
 
-            broadcast(new OrderUpdated($order, 'created'))->toOthers();
+            
             return $order->load('items.product');
+            
+            return $order->load('items.product','user');
         });
+
+    broadcast(new OrderUpdated($order, 'created'))->toOthers();
+    SendOrderConfirmationEmailJob::dispatch($order);
+
+    return $order;
+      
     }
 
     /**
@@ -127,9 +137,12 @@ class OrderService
                 }
             }
         }
-        broadcast(new OrderUpdated($order, 'updated'))->toOthers();
+        $updatedOrder = $this->orderRepository->updateStatus($order, $newStatus);
 
-        return $this->orderRepository->updateStatus($order, $newStatus);
+        broadcast(new OrderUpdated($order, 'updated'))->toOthers();
+        SendOrderStatusUpdatedEmailJob::dispatch($updatedOrder, $newStatus->value);
+        return $updatedOrder;
+
     }
 
     /**

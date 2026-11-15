@@ -22,6 +22,17 @@ class OrdersServiceProvider extends ModuleServiceProvider
     protected string $nameLower = 'orders';
 
     /**
+     * Boot the application events.
+     */
+    public function boot(): void
+    {
+        parent::boot();
+
+        // تسجيل مسار ملفات الـ Blade الخاصة بالموديول
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'orders');
+    }
+
+    /**
      * Register bindings in the container.
      */
     public function register(): void
