@@ -12,6 +12,8 @@ use Modules\Orders\Repositories\OrderRepositoryInterface;
 use Exception;
 use InvalidArgumentException;
 use Modules\Shared\Services\InventoryGrpcService;
+use Modules\Orders\App\Jobs\SendOrderConfirmationEmailJob;
+use Modules\Orders\App\Jobs\SendOrderStatusUpdatedEmailJob;
 
 class OrderService
 {
@@ -86,7 +88,7 @@ class OrderService
             }
         }
 
-        return DB::transaction(function () use ($userId, $cartItems): Order {
+        $order= DB::transaction(function () use ($userId, $cartItems): Order {
 
             $order = $this->orderRepository->create([
                 'user_id' => $userId,
@@ -97,9 +99,15 @@ class OrderService
             $this->orderRepository->createItems($order, $this->buildOrderItems($cartItems));
 
             $this->cartRepository->clearCart($userId);
-
-            return $order->load('items.product');
+            
+            return $order->load('items.product','user');
         });
+
+        // 🚀 إرسال المهمة إلى طابور المعالجة في الخلفية فوراً (Asynchronous Queue)
+    SendOrderConfirmationEmailJob::dispatch($order);
+
+    return $order;
+      
     }
 
     /**
@@ -125,8 +133,12 @@ class OrderService
                 }
             }
         }
+         $updatedOrder = $this->orderRepository->updateStatus($order, $newStatus);
 
-        return $this->orderRepository->updateStatus($order, $newStatus);
+        //    إرسال مهمة المعالجة في الخلفية 
+        SendOrderStatusUpdatedEmailJob::dispatch($updatedOrder, $newStatus->value);
+        return $updatedOrder;
+
     }
 
     /**
