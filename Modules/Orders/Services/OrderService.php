@@ -11,6 +11,7 @@ use Modules\Orders\Repositories\CartRepositoryInterface;
 use Modules\Orders\Repositories\OrderRepositoryInterface;
 use Exception;
 use InvalidArgumentException;
+use Modules\Orders\Events\OrderUpdated;
 use Modules\Shared\Services\InventoryGrpcService;
 
 class OrderService
@@ -98,6 +99,7 @@ class OrderService
 
             $this->cartRepository->clearCart($userId);
 
+            broadcast(new OrderUpdated($order, 'created'))->toOthers();
             return $order->load('items.product');
         });
     }
@@ -125,6 +127,7 @@ class OrderService
                 }
             }
         }
+        broadcast(new OrderUpdated($order, 'updated'))->toOthers();
 
         return $this->orderRepository->updateStatus($order, $newStatus);
     }
@@ -148,6 +151,7 @@ class OrderService
                 throw new Exception("فشل إعادة المخزون أثناء حذف الطلب للمنتج {$item->product->name}: " . $e->getMessage(), 422);
             }
         }
+        broadcast(new OrderUpdated($order, 'deleted'))->toOthers();
 
         return $this->orderRepository->delete($order);
     }
