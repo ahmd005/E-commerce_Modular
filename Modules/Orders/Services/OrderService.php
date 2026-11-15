@@ -11,6 +11,7 @@ use Modules\Orders\Repositories\CartRepositoryInterface;
 use Modules\Orders\Repositories\OrderRepositoryInterface;
 use Exception;
 use InvalidArgumentException;
+use Modules\Orders\Events\OrderUpdated;
 use Modules\Shared\Services\InventoryGrpcService;
 use Modules\Orders\App\Jobs\SendOrderConfirmationEmailJob;
 use Modules\Orders\App\Jobs\SendOrderStatusUpdatedEmailJob;
@@ -99,11 +100,14 @@ class OrderService
             $this->orderRepository->createItems($order, $this->buildOrderItems($cartItems));
 
             $this->cartRepository->clearCart($userId);
+
+            
+            return $order->load('items.product');
             
             return $order->load('items.product','user');
         });
 
-        // 🚀 إرسال المهمة إلى طابور المعالجة في الخلفية فوراً (Asynchronous Queue)
+    broadcast(new OrderUpdated($order, 'created'))->toOthers();
     SendOrderConfirmationEmailJob::dispatch($order);
 
     return $order;
@@ -133,9 +137,9 @@ class OrderService
                 }
             }
         }
-         $updatedOrder = $this->orderRepository->updateStatus($order, $newStatus);
+        $updatedOrder = $this->orderRepository->updateStatus($order, $newStatus);
 
-        //    إرسال مهمة المعالجة في الخلفية 
+        broadcast(new OrderUpdated($order, 'updated'))->toOthers();
         SendOrderStatusUpdatedEmailJob::dispatch($updatedOrder, $newStatus->value);
         return $updatedOrder;
 
@@ -160,6 +164,7 @@ class OrderService
                 throw new Exception("فشل إعادة المخزون أثناء حذف الطلب للمنتج {$item->product->name}: " . $e->getMessage(), 422);
             }
         }
+        broadcast(new OrderUpdated($order, 'deleted'))->toOthers();
 
         return $this->orderRepository->delete($order);
     }

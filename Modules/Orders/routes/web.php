@@ -6,3 +6,5 @@ use Illuminate\Support\Facades\Route;
 // Route::middleware(['auth', 'verified'])->group(function () {
 //     Route::resource('orders', OrdersController::class)->names('orders');
 // });
+
+Route::get('/test-reverb', fn() => view('test'));

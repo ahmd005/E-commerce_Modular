@@ -10,7 +10,7 @@ use Modules\Users\Models\User;
 
 class OrderSeeder extends Seeder
 {
-    private const TOTAL_ORDERS = 10000;
+    private const TOTAL_ORDERS = 1000;
     private const CHUNK_SIZE   = 500;
     private const MAX_ITEMS    = 5;
     private const MAX_QTY      = 3;

@@ -25,8 +25,8 @@ class ProductsDatabaseSeeder extends Seeder
         Category::factory(100)->create();
 
         $this->command->info('Creating products...');
-        $batches = 20;
-        $batchSize = 1000;
+        $batches = 10;
+        $batchSize = 100;
 
         for ($i = 0; $i < $batches; $i++) {
             $now = now('UTC');
