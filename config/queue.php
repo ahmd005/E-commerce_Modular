@@ -89,6 +89,29 @@ return [
             ],
         ],
 
+
+        'rabbitmq' => [
+    'driver' => 'rabbitmq',
+    'host' => env('RABBITMQ_HOST', '127.0.0.1'),
+    'port' => env('RABBITMQ_PORT', 5672),
+    'queue' => env('RABBITMQ_QUEUE', 'default'),
+    'password' => env('RABBITMQ_PASSWORD', 'guest'),
+    'user' => env('RABBITMQ_USER', 'guest'),
+    'vhost' => env('RABBITMQ_VHOST', '/'),
+    
+    'options' => [
+        'queue' => [
+            'job' => VladimirYuldashev\LaravelQueueRabbitMQ\Queue\Jobs\RabbitMQJob::class,
+            'durable' => true,
+            'arguments' => [
+                // إعداد الـ Dead Letter Exchange (DLX) المطلوب في المشروع الجامعي
+                'x-dead-letter-exchange' => ['s', 'dlx.exchange'],
+                'x-dead-letter-routing-key' => ['s', 'dlq.queue'],
+            ],
+        ],
+    ],
+],
+
     ],
 
     /*
