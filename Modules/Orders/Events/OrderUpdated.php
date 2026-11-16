@@ -8,32 +8,33 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Modules\Orders\Models\Order;
+use Illuminate\Broadcasting\PrivateChannel;
+
 
 class OrderUpdated implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    public $order;
+    public $action;
 
-    public Order $order;
-    public string $action; // (created, updated, deleted, cancelled)
-
-    public function __construct(Order $order, string $action)
+    public function __construct($order, $action)
     {
         $this->order = $order;
         $this->action = $action;
     }
 
-    /**
-     * القناة التي سيتم بث الحدث عليها
-     */
     public function broadcastOn(): array
     {
         return [
-            new Channel('orders-channel'), // يمكنك تخصيصها لكل مستخدم لاحقاً مثل new PrivateChannel('orders.' . $this->order->user_id)
+            // القناة الأولى: لوحة المسؤول (Private Channel)
+            new PrivateChannel('admin-orders-channel'),
+            
+            // القناة الثانية: قناة المستخدم صاحب الطلب نفسه (Private Channel)
+            new PrivateChannel('user-orders-channel.' . $this->order->user_id),
         ];
     }
 
     public function broadcastAs(): string
     {
-        return 'order.updated';
+        return '.order.updated';
     }
 }
