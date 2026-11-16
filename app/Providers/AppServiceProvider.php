@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Database\Events\TransactionBeginning;
 use Illuminate\Database\Events\TransactionCommitted;
 use Illuminate\Database\Events\TransactionRolledBack;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
@@ -94,5 +95,8 @@ class AppServiceProvider extends ServiceProvider
                 fn() => DB::connection('mysql_read')->getPdo()
             );
         }
+
+        Broadcast::routes(['middleware' => ['auth:api']]);
+    require base_path('routes/channels.php');
     }
 }

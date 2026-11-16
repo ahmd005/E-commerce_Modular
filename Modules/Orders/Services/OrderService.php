@@ -137,9 +137,15 @@ class OrderService
                 }
             }
         }
+        // $updatedOrder = $this->orderRepository->updateStatus($order, $newStatus);
+
+        // broadcast(new OrderUpdated($order, 'updated'))->toOthers();
+        // SendOrderStatusUpdatedEmailJob::dispatch($updatedOrder, $newStatus->value);
+        // return $updatedOrder;
+
         $updatedOrder = $this->orderRepository->updateStatus($order, $newStatus);
 
-        broadcast(new OrderUpdated($order, 'updated'))->toOthers();
+        event(new OrderUpdated($updatedOrder, 'updated'));
         SendOrderStatusUpdatedEmailJob::dispatch($updatedOrder, $newStatus->value);
         return $updatedOrder;
 
