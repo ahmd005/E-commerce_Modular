@@ -192,7 +192,43 @@ try {
         $query->where('name', 'like', '%' . $request->search . '%');
     }
 
-    return $query->paginate($perPage);
+    // 1. جلب المنتجات محلياً مع الـ Pagination
+    $paginatedProducts = $query->paginate($perPage);
+
+    // 2. جلب الكميات والمخزون من خدمة الـ gRPC ودمجها
+    try {
+        $inventoryResponse = $this->inventoryGrpcService->listProducts();
+        
+        $inventoryList = is_array($inventoryResponse) 
+            ? ($inventoryResponse['data'] ?? $inventoryResponse) 
+            : [];
+
+        $inventoryProducts = collect($inventoryList);
+
+        $paginatedProducts->getCollection()->transform(function ($product) use ($inventoryProducts) {
+            $inventoryItem = $inventoryProducts->first(function ($item) use ($product) {
+                return (isset($item['product_id']) && $item['product_id'] == $product->uuid) ||
+                       (isset($item['uuid']) && $item['uuid'] == $product->uuid) ||
+                       (isset($item['sku']) && $item['sku'] == $product->sku) ||
+                       (isset($item['id']) && $item['id'] == $product->id);
+            });
+            
+            // تعيين الكمية من الـ gRPC
+            $product->quantity = $inventoryItem['quantity'] ?? $inventoryItem['stock'] ?? 0;
+
+            return $product;
+        });
+    } catch (\Exception $e) {
+        // في حال توقف السيرفر الثاني، تصبح الكمية 0 كحماية
+        $paginatedProducts->getCollection()->transform(function ($product) {
+            $product->quantity = 0;
+            return $product;
+        });
+    }
+
+
+return $paginatedProducts;
+   // return $query->paginate($perPage);
 }
 
 
