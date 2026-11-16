@@ -35,6 +35,6 @@ class OrderUpdated implements ShouldBroadcast
 
     public function broadcastAs(): string
     {
-        return '.order.updated';
+        return 'order.updated';
     }
 }
